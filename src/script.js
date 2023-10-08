@@ -7,9 +7,15 @@ import * as dat from 'dat.gui'
 // Scene
 const scene = new THREE.Scene()
 
+// Initialize Texture Index
+let textureIndex = 1
+
+// Texture
+const textLoader = new THREE.TextureLoader()
+let matcapTexture = textLoader.load(`/matcaps/${textureIndex}.png`)
+
 // Debug UI
 const gui = new dat.GUI()
-let textureIndex = 1
 
 const textureFolder = gui.addFolder('Texture')
 const guiParameter = {
@@ -24,6 +30,17 @@ textureFolder
   .onChange(() => {
     textureIndex = guiParameter.changeTexture
     console.log(textureIndex)
+
+    // Update Texture
+    matcapTexture = textLoader.load(`/matcaps/${textureIndex}.png`)
+
+    // Destroy everything
+    for (let i = scene.children.length - 1; i >= 0; i--) {
+      if (scene.children[i].type === 'Mesh') scene.remove(scene.children[i])
+    }
+
+    // Update Loaded Font
+    loadFontRandomDonuts()
   })
 
 // Axes Helper
@@ -33,75 +50,76 @@ textureFolder
 // Fonts
 const fontLoader = new FontLoader()
 
-// Texture
-const textLoader = new THREE.TextureLoader()
-const matcapTexture = textLoader.load(`/matcaps/${textureIndex}.png`)
+const loadFontRandomDonuts = () => {
+  fontLoader.load(
+    '/fonts/helvetiker_regular.typeface.json',
 
-fontLoader.load(
-  '/fonts/helvetiker_regular.typeface.json',
+    // onLoad callback
+    (font) => {
+      const textGeometry = new TextGeometry('Become™', {
+        font: font,
+        size: 0.5,
+        height: 0.2,
+        curveSegments: 5,
+        bevelEnabled: true,
+        bevelThickness: 0.03,
+        bevelSize: 0.02,
+        bevelOffset: 0,
+        bevelSegments: 3,
+      })
+      // Move textGeometry in center
+      // textGeometry.computeBoundingBox()
+      // textGeometry.translate(
+      //   -(textGeometry.boundingBox.max.x - 0.02) * 0.5,
+      //   -(textGeometry.boundingBox.max.y - 0.02) * 0.5,
+      //   -(textGeometry.boundingBox.max.z - 0.03) * 0.5
+      // )
 
-  // onLoad callback
-  (font) => {
-    const textGeometry = new TextGeometry('Become™', {
-      font: font,
-      size: 0.5,
-      height: 0.2,
-      curveSegments: 5,
-      bevelEnabled: true,
-      bevelThickness: 0.03,
-      bevelSize: 0.02,
-      bevelOffset: 0,
-      bevelSegments: 3,
-    })
-    // Move textGeometry in center
-    // textGeometry.computeBoundingBox()
-    // textGeometry.translate(
-    //   -(textGeometry.boundingBox.max.x - 0.02) * 0.5,
-    //   -(textGeometry.boundingBox.max.y - 0.02) * 0.5,
-    //   -(textGeometry.boundingBox.max.z - 0.03) * 0.5
-    // )
+      // Much faster way
+      textGeometry.center()
 
-    // Much faster way
-    textGeometry.center()
+      const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
+      // textMaterial.wireframe = true
+      const text = new THREE.Mesh(textGeometry, material)
+      scene.add(text)
 
-    const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
-    // textMaterial.wireframe = true
-    const text = new THREE.Mesh(textGeometry, material)
-    scene.add(text)
+      const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45)
 
-    const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45)
+      console.time('donuts')
+      // Add Donut Geometry
+      for (let i = 0; i < 100; i++) {
+        const donut = new THREE.Mesh(donutGeometry, material)
 
-    console.time('donuts')
-    // Add Donut Geometry
-    for (let i = 0; i < 100; i++) {
-      const donut = new THREE.Mesh(donutGeometry, material)
+        // Randomize
+        donut.position.x = (Math.random() - 0.5) * 10
+        donut.position.y = (Math.random() - 0.5) * 10
+        donut.position.z = (Math.random() - 0.5) * 10
 
-      // Randomize
-      donut.position.x = (Math.random() - 0.5) * 10
-      donut.position.y = (Math.random() - 0.5) * 10
-      donut.position.z = (Math.random() - 0.5) * 10
+        donut.rotation.x = Math.random() * Math.PI
+        donut.rotation.y = Math.random() * Math.PI
 
-      donut.rotation.x = Math.random() * Math.PI
-      donut.rotation.y = Math.random() * Math.PI
+        const scale = Math.random()
+        donut.scale.set(scale, scale, scale)
 
-      const scale = Math.random()
-      donut.scale.set(scale, scale, scale)
+        scene.add(donut)
+      }
+      console.timeEnd('donuts')
+    },
 
-      scene.add(donut)
+    // onProgress callback
+    (xhr) => {
+      console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+    },
+
+    // onError callback
+    (err) => {
+      console.log('An error happened')
     }
-    console.timeEnd('donuts')
-  },
+  )
+}
 
-  // onProgress callback
-  (xhr) => {
-    console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
-  },
-
-  // onError callback
-  (err) => {
-    console.log('An error happened')
-  }
-)
+// Initial load
+loadFontRandomDonuts()
 
 // Sizes
 const sizes = {
