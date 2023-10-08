@@ -77,6 +77,7 @@ const loadFontRandomDonuts = () => {
 
       // Much faster way
       textGeometry.center()
+      console.time('donuts')
 
       const material = new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
       // textMaterial.wireframe = true
@@ -85,7 +86,6 @@ const loadFontRandomDonuts = () => {
 
       const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45)
 
-      console.time('donuts')
       // Add Donut Geometry
       for (let i = 0; i < 100; i++) {
         const donut = new THREE.Mesh(donutGeometry, material)
