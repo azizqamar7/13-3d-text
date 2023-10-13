@@ -2,7 +2,10 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
 import * as dat from 'dat.gui'
+import { Mesh } from 'three'
 
 // Scene
 const scene = new THREE.Scene()
@@ -83,6 +86,106 @@ const loadFontRandomDonuts = () => {
       // textMaterial.wireframe = true
       const text = new THREE.Mesh(textGeometry, material)
       scene.add(text)
+
+      // Import 3D Modal
+      // let becomeMonogram
+      // const gltfLoader = new GLTFLoader()
+      // gltfLoader.load(
+      //   'become_monogram.glb',
+      //   (glb) => {
+      //     console.log(glb)
+      //     becomeMonogram = glb.scene
+      //     // Assuming 'object' is the loaded 3D model
+      //     becomeMonogram.traverse(function (child) {
+      //       console.log(child)
+      //       if (child instanceof THREE.Mesh) {
+      //         child.material.map = matcapTexture
+      //         // child.material.color.set('#ffffff')
+      //       }
+      //     })
+      //     becomeMonogram.scale.set(0.5, 0.5, 0.5)
+
+      //     matcapTexture.wrapS = THREE.RepeatWrapping
+      //     matcapTexture.wrapT = THREE.RepeatWrapping
+      //     matcapTexture.repeat.set(2, 2) // Repeat the matcapTexture 2x2 times
+      //     matcapTexture.offset.set(0.5, 0.5) // Offset the texture
+
+      //     scene.add(becomeMonogram)
+      //   },
+      //   (xhr) => {
+      //     console.log((xhr.loaded / xhr.total) * 100 + '% loaded')
+      //   },
+      //   (error) => {
+      //     console.log('An error occured' + error)
+      //   }
+      // )
+
+      // Become Logo
+      // const becomeLogoGroup = new THREE.Group()
+      // scene.add(becomeLogoGroup)
+      // const becomeMonogramBox = new THREE.Mesh(
+      //   new THREE.BoxGeometry(1, 1, 1),
+      //   new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
+      // )
+      // const becomeMonogramOpenEnd = new THREE.Mesh(
+      //   new THREE.PlaneGeometry(1, 1),
+      //   new THREE.MeshMatcapMaterial({
+      //     matcap: matcapTexture,
+      //     side: DoubleSide,
+      //   })
+      // )
+      // becomeMonogramOpenEnd.position.set(-0.5, 1, 0)
+      // becomeMonogramOpenEnd.rotation.y = Math.PI / 2
+      // becomeLogoGroup.position.set(-2, 0, 0)
+      // becomeLogoGroup.scale.set(0.5, 0.5, 0.5)
+      // becomeLogoGroup.rotation.set(0.7, 0, -0.3)
+      // gui.add(becomeLogoGroup.rotation, 'x').min(-1).max(1).step(0.001)
+      // gui.add(becomeLogoGroup.rotation, 'y').min(-1).max(1).step(0.001)
+      // gui.add(becomeLogoGroup.rotation, 'z').min(-1).max(1).step(0.001)
+      // becomeLogoGroup.add(becomeMonogramBox, becomeMonogramOpenEnd)
+
+      // Load SVG
+      const svgLoader = new SVGLoader()
+      svgLoader.load(
+        'become-monogram.svg',
+        (data) => {
+          const paths = data.paths
+          const becomeLogoGroup = new THREE.Group()
+          scene.add(becomeLogoGroup)
+          paths.forEach((path) => {
+            const shapes = path.toShapes(true)
+
+            shapes.forEach(function (shape) {
+              const extrudeSettings = {
+                depth: 55,
+                bevelEnabled: true,
+                bevelSize: 0.02,
+                bevelSegments: 3,
+                bevelThickness: 0.01,
+              }
+
+              const shapeGeometry = new THREE.ExtrudeGeometry(
+                shape,
+                extrudeSettings
+              )
+              const mesh = new THREE.Mesh(
+                shapeGeometry,
+                new THREE.MeshMatcapMaterial({ matcap: matcapTexture })
+              ) // Set your desired material here
+              becomeLogoGroup.add(mesh)
+              becomeLogoGroup.scale.set(0.004, 0.004, 0.004)
+              becomeLogoGroup.rotation.x = Math.PI
+              becomeLogoGroup.position.set(-2.35, 0.6, 0.11)
+            })
+          })
+        },
+        (xhr) => {
+          console.log((xhr.loaded / xhr.total) * 100 + '% SVG loaded')
+        },
+        (error) => {
+          console.error('Error loading SVG:', error)
+        }
+      )
 
       const donutGeometry = new THREE.TorusGeometry(0.3, 0.2, 20, 45)
 
