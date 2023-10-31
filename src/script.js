@@ -30,7 +30,7 @@ textureFolder
   .max(8)
   .step(1)
   .name('name')
-  .onChange(() => {
+  .onFinishChange(() => {
     textureIndex = guiParameter.changeTexture
     console.log(textureIndex)
 
